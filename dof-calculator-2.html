@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Moodfilms – DOF Calculator (Brand Presets)</title>
+<meta name="description" content="Depth of Field calculator with brand-specific presets (Canon, Nikon, Sony, Fujifilm, Panasonic/Olympus, Leica, Blackmagic) and Custom Sensor. Offline-ready.">
+<style>
+:root{
+  --bg:#0a0d12; --bg2:#0c1118; --ink:#e9edf2; --muted:#a6b0bb;
+  --line:rgba(255,255,255,.1); --card:rgba(255,255,255,.05);
+  --accent:#59e3c0; --accent2:#78b9ff; --shadow:0 10px 30px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:linear-gradient(180deg,var(--bg),var(--bg2));color:var(--ink);
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif}
+a{color:inherit;text-decoration:none}
+.header{border-bottom:1px solid var(--line);text-align:center;padding:26px 18px}
+.header h1{font-size:clamp(26px,5vw,40px);margin:.2rem 0}
+.header p{color:var(--muted);margin:0}
+.container{max-width:1100px;margin:0 auto;padding:20px 16px}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));align-items:start}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:var(--shadow)}
+h2{font-size:1.05rem;margin:.2rem 0 .4rem}
+.label{display:block;font-weight:600;margin:.4rem 0 .25rem}
+input,select,button{width:100%;padding:.6rem .7rem;border-radius:12px;border:1px solid var(--line);
+  background:#0f151c;color:var(--ink)}
+button{cursor:pointer;font-weight:700}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:.6rem}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#07131e;border:0}
+.inline{display:flex;gap:8px;align-items:center}
+.inline > *{flex:1}
+.small{color:var(--muted);font-size:.92rem}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:540px){ .row{grid-template-columns:1fr} }
+.kicker{display:inline-block;background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:999px;
+  padding:.25rem .6rem;font-size:.8rem;margin-bottom:.25rem}
+.result{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:10px}
+.result .box{background:#0f151c;border:1px solid var(--line);border-radius:12px;padding:10px}
+.result .box h3{margin:.2rem 0;font-size:.95rem;color:#cfe6ff}
+.result .box p{margin:0;font-weight:800;font-size:1.05rem}
+hr{border:none;border-top:1px solid var(--line);margin:12px 0}
+.details{color:var(--muted);font-size:.92rem}
+.help{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:var(--shadow);margin-bottom:18px}
+.help h2{display:flex;align-items:center;gap:.6rem;margin:.2rem 0 .4rem}
+.help ul{margin:.5rem 0}
+kbd{background:#121820;border:1px solid var(--line);border-radius:6px;padding:0 .35rem}
+.adv{display:none}
+.adv.show{display:block}
+.unit-btns{display:flex;gap:6px}
+.unit-btns button{flex:0 0 auto;padding:.45rem .7rem;font-weight:700}
+.unit-btns .active{outline:2px solid var(--accent)}
+.custom-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+@media(max-width:720px){ .custom-grid{grid-template-columns:1fr 1fr} }
+footer{padding:28px 16px;color:var(--muted);text-align:center;border-top:1px solid var(--line);margin-top:14px}
+</style>
+</head>
+<body>
+  <header class="header">
+    <h1>Depth of Field Calculator</h1>
+    <p>Brand presets + Custom Sensor. Offline-ready. No data leaves your browser.</p>
+  </header>
+
+  <main class="container">
+    <!-- Help -->
+    <section class="help" aria-label="Help">
+      <h2>💡 Who this is for</h2>
+      <p>For photographers and filmmakers who want to quickly evaluate depth of field while shooting or planning, without relying on external services. The tool runs entirely in your browser, works offline, and never sends any data online.</p>
+      <p>This Depth of Field (DOF) calculator helps you understand how <strong>aperture</strong>, <strong>focal length</strong>, <strong>focus distance</strong>, and <strong>sensor size</strong> together affect <strong>depth of field</strong> and <strong>framing</strong>.</p>
+      <h2>📘 How it works</h2>
+      <ul>
+        <li><strong>How to use:</strong> Pick a <em>Preset</em> (sensor size) or choose <em>Custom</em> and enter width/height (mm). Set <em>Focal length</em>, <em>Aperture</em>, and <em>Focus distance</em>. Click <em>Calculate</em>.</li>
+        <li><strong>Units:</strong> Enter distance in metres (<kbd>m</kbd>) or feet (<kbd>ft</kbd>). Results are shown in both.</li>
+        <li><strong>Custom Sensor:</strong> When selected, enter width/height (mm). <em>CoC</em> (circle of confusion) is auto-calculated from diagonal crop vs Full Frame (base 0.030 mm), unless overridden.</li>
+        <li><strong>Advanced options:</strong> Override <em>CoC</em> and choose whether hyperfocal distance uses the +f variant (<code>H = f²/(N·c) + f</code>) or not (<code>H ≈ f²/(N·c)</code>).</li>
+        <li><strong>Practical meaning:</strong>
+          <ul>
+            <li><em>Hyperfocal distance</em> — focus at H to maximise DOF; everything from H/2 to ∞ is acceptably sharp.</li>
+            <li><em>Near/Far limits</em> — the distances that bound acceptable sharpness.</li>
+            <li><em>Total DOF</em> — Far − Near. If Far = ∞, depth extends to infinity.</li>
+            <li><em>Angle of View</em> — horizontal field of view from sensor width and focal length.</li>
+            <li><em>Framing width @ distance</em> — real‑world width at your focus distance for quick composition estimates.</li>
+          </ul>
+        </li>
+        <li><strong>Notes:</strong> Some presets (e.g., S35/S16/BMPCC) are approximate across models. Use <em>Custom</em> for exact sensors. All calculations run locally.</li>
+      </ul>
+    </section>
+
+    <section class="grid" aria-label="Input and Results">
+      <!-- Inputs -->
+      <div class="card">
+        <span class="kicker">Camera & Sensor</span>
+        <label class="label" for="sensor">Preset</label>
+        <select id="sensor">
+          <optgroup label="Canon">
+            <option value="canon_ff">Canon RF/EF Full Frame 36×24mm</option>
+            <option value="canon_aps">Canon RF‑S/EF‑S APS‑C 22.3×14.9mm</option>
+          </optgroup>
+          <optgroup label="Nikon">
+            <option value="nikon_fx">Nikon Z/ F‑mount Full Frame 36×24mm</option>
+            <option value="nikon_dx">Nikon Z DX / F DX APS‑C 23.5×15.7mm</option>
+          </optgroup>
+          <optgroup label="Sony">
+            <option value="sony_ff">Sony α Full Frame 36×24mm</option>
+            <option value="sony_aps">Sony α APS‑C 23.6×15.7mm</option>
+          </optgroup>
+          <optgroup label="Fujifilm">
+            <option value="fuji_x">Fujifilm X APS‑C 23.5×15.6mm</option>
+            <option value="fuji_gfx">Fujifilm GFX 44×33mm</option>
+          </optgroup>
+          <optgroup label="Panasonic / Olympus (OM System)">
+            <option value="mft">Micro Four Thirds 17.3×13.0mm</option>
+            <option value="panasonic_s_ff">Panasonic S Full Frame 36×24mm</option>
+          </optgroup>
+          <optgroup label="Leica / L‑Mount">
+            <option value="leica_l_ff">Leica/Panasonic/Sigma L‑Mount Full Frame 36×24mm</option>
+            <option value="leica_tl_aps">Leica TL APS‑C 23.6×15.7mm</option>
+          </optgroup>
+          <optgroup label="Blackmagic / Cinema">
+            <option value="bmpcc6k">Blackmagic Pocket 6K ≈23.1×13.0mm</option>
+            <option value="bmpcc4k">Blackmagic Pocket 4K ≈18.96×10.0mm</option>
+            <option value="s35">Super 35 ≈24.9×18.7mm</option>
+            <option value="s16">Super 16 ≈12.5×7.4mm</option>
+          </optgroup>
+          <optgroup label="Medium Format (Others)">
+            <option value="mf_54x40">≈54×40mm (Phase/ Hasselblad class)</option>
+          </optgroup>
+          <optgroup label="Generic / Custom">
+            <option value="ff_generic">Full Frame 36×24mm (Generic)</option>
+            <option value="aps_235x157">APS‑C 23.5×15.7mm (Generic)</option>
+            <option value="aps_236x157">APS‑C 23.6×15.7mm (Generic)</option>
+            <option value="aps_223x149">APS‑C 22.3×14.9mm (Generic)</option>
+            <option value="custom">Custom (enter width/height)</option>
+          </optgroup>
+        </select>
+
+        <div id="customWrap" class="adv" style="margin-top:8px">
+          <div class="custom-grid">
+            <div>
+              <label class="label" for="custW">Sensor width (mm)</label>
+              <input id="custW" type="number" min="5" step="0.01" placeholder="e.g. 36.0">
+            </div>
+            <div>
+              <label class="label" for="custH">Sensor height (mm)</label>
+              <input id="custH" type="number" min="5" step="0.01" placeholder="e.g. 24.0">
+            </div>
+            <div>
+              <label class="label" for="custCoC">CoC (mm)</label>
+              <input id="custCoC" type="number" min="0.005" step="0.001" placeholder="auto">
+            </div>
+          </div>
+          <div class="small">If CoC is empty, it will be derived from diagonal crop vs Full Frame (base 0.030 mm).</div>
+        </div>
+
+        <div class="row" style="margin-top:8px">
+          <div>
+            <label class="label" for="focal">Focal length (mm)</label>
+            <input id="focal" type="number" inputmode="decimal" min="1" step="1" value="35">
+          </div>
+          <div>
+            <label class="label" for="aperture">Aperture (f‑number)</label>
+            <input id="aperture" type="number" inputmode="decimal" min="0.7" step="0.1" value="2.8">
+          </div>
+        </div>
+
+        <label class="label" for="distance">Focus distance</label>
+        <div class="inline">
+          <input id="distance" type="number" inputmode="decimal" min="0.1" step="0.1" value="5">
+          <div class="unit-btns" role="group" aria-label="Units">
+            <button type="button" data-unit="m" class="unit active">m</button>
+            <button type="button" data-unit="ft" class="unit">ft</button>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="calc" class="btn-primary">Calculate</button>
+          <button id="reset">Reset</button>
+          <button id="toggleAdv">Advanced</button>
+        </div>
+
+        <div id="advanced" class="adv">
+          <hr>
+          <h2>Advanced options</h2>
+          <div class="row">
+            <div>
+              <label class="label" for="coc">Override CoC (mm)</label>
+              <input id="coc" type="number" inputmode="decimal" min="0.005" step="0.001" placeholder="auto">
+            </div>
+            <div>
+              <label class="label" for="hfAdd">Include focal length in H</label>
+              <select id="hfAdd">
+                <option value="1">Yes (H = f²/(N·c) + f)</option>
+                <option value="0">No (H ≈ f²/(N·c))</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div class="card">
+        <span class="kicker">Results</span>
+        <div class="result">
+          <div class="box">
+            <h3>Hyperfocal distance</h3>
+            <p id="outH">—</p>
+          </div>
+          <div class="box">
+            <h3>Near limit</h3>
+            <p id="outNear">—</p>
+          </div>
+          <div class="box">
+            <h3>Far limit</h3>
+            <p id="outFar">—</p>
+          </div>
+          <div class="box">
+            <h3>Total DOF</h3>
+            <p id="outDoF">—</p>
+          </div>
+        </div>
+
+        <hr>
+
+        <h2>Field of View (Horizontal)</h2>
+        <div class="result">
+          <div class="box">
+            <h3>Angle of View</h3>
+            <p id="outAOV">—</p>
+          </div>
+          <div class="box">
+            <h3>Framing width @ distance</h3>
+            <p id="outWidthAtDist">—</p>
+          </div>
+        </div>
+
+        <div class="details">
+          <hr>
+          <p><strong>Notes</strong></p>
+          <ul>
+            <li>Units: input in metres or feet; results are shown in both.</li>
+            <li>Default CoC: Full Frame = 0.030 mm; other presets scale by diagonal crop. You can override in Advanced.</li>
+            <li>Formulas: H = f²/(N·c) (+ f), Near = (H·s)/(H + (s − f)), Far = (H·s)/(H − (s − f)).</li>
+            <li>All variables (f, c, s, H) are in the same units (mm). Far = ∞ when s ≥ H (with +f convention).</li>
+            <li>Presets like S35/S16/BMPCC are approximate across models. Use Custom for exact sensors.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>© Moodfilms / Veijo Ruotanen — This tool runs entirely in your browser.</footer>
+
+<script>
+(function(){
+  const FF_DIAG = Math.hypot(36.0, 24.0); // 43.2666... mm
+
+  const presets = {
+    // Canon
+    canon_ff:     { w:36.0,   h:24.0 },
+    canon_aps:    { w:22.3,   h:14.9 },
+    // Nikon
+    nikon_fx:     { w:36.0,   h:24.0 },
+    nikon_dx:     { w:23.5,   h:15.7 },
+    // Sony
+    sony_ff:      { w:36.0,   h:24.0 },
+    sony_aps:     { w:23.6,   h:15.7 },
+    // Fujifilm
+    fuji_x:       { w:23.5,   h:15.6 },
+    fuji_gfx:     { w:44.0,   h:33.0 },
+    // Panasonic / Olympus
+    mft:          { w:17.3,   h:13.0 },
+    panasonic_s_ff:{ w:36.0,  h:24.0 },
+    // Leica / L‑Mount
+    leica_l_ff:   { w:36.0,   h:24.0 },
+    leica_tl_aps: { w:23.6,   h:15.7 },
+    // Blackmagic / Cinema
+    bmpcc6k:      { w:23.1,   h:13.0 }, // approx
+    bmpcc4k:      { w:18.96,  h:10.0 }, // approx
+    s35:          { w:24.9,   h:18.7 }, // approx
+    s16:          { w:12.52,  h:7.41 }, // approx
+    // Medium format generic
+    mf_54x40:     { w:54.0,   h:40.0 },
+    // Generic fallback options
+    ff_generic:   { w:36.0,   h:24.0 },
+    aps_235x157:  { w:23.5,   h:15.7 },
+    aps_236x157:  { w:23.6,   h:15.7 },
+    aps_223x149:  { w:22.3,   h:14.9 }
+  };
+
+  const el = id => document.getElementById(id);
+
+  const sensorSel = el('sensor');
+  const focalIn = el('focal');
+  const apertureIn = el('aperture');
+  const distIn = el('distance');
+  const cocIn = el('coc');
+  const hfAddSel = el('hfAdd');
+  const outH = el('outH'), outNear = el('outNear'), outFar = el('outFar'), outDoF = el('outDoF');
+  const outAOV = el('outAOV'), outWidthAtDist = el('outWidthAtDist');
+
+  const customWrap = el('customWrap');
+  const custW = el('custW'), custH = el('custH'), custCoC = el('custCoC');
+
+  let unit = 'm'; // 'm' or 'ft'
+
+  document.querySelectorAll('.unit').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.unit').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      unit = btn.dataset.unit;
+    });
+  });
+
+  el('toggleAdv').addEventListener('click', () => {
+    el('advanced').classList.toggle('show');
+  });
+
+  el('reset').addEventListener('click', () => {
+    sensorSel.value = 'canon_ff';
+    focalIn.value = 35;
+    apertureIn.value = 2.8;
+    distIn.value = 5;
+    unit = 'm';
+    document.querySelectorAll('.unit').forEach(b=>b.classList.remove('active'));
+    document.querySelector('.unit[data-unit=\"m\"]').classList.add('active');
+    cocIn.value = "";
+    hfAddSel.value = "1";
+    custW.value = ""; custH.value=""; custCoC.value="";
+    customWrap.classList.remove('show');
+    [outH,outNear,outFar,outDoF,outAOV,outWidthAtDist].forEach(o => o.textContent = '—');
+  });
+
+  sensorSel.addEventListener('change', ()=>{
+    if(sensorSel.value === 'custom'){
+      customWrap.classList.add('show');
+    } else {
+      customWrap.classList.remove('show');
+    }
+  });
+
+  function cropFromWH(w,h){
+    const d = Math.hypot(w,h);
+    return FF_DIAG / d; // crop factor vs FF diagonal
+  }
+
+  function defaultCoC(w,h){
+    const crop = cropFromWH(w,h);
+    return 0.030 / crop; // scale vs FF base
+  }
+
+  function fmt(m){
+    const feet = m * 3.280839895;
+    function niceM(x){
+      if (!isFinite(x)) return '∞';
+      if (x >= 1000) return x.toFixed(0) + ' m';
+      if (x >= 10) return x.toFixed(1) + ' m';
+      if (x >= 1) return x.toFixed(2) + ' m';
+      if (x >= 0.1) return x.toFixed(3) + ' m';
+      return x.toFixed(4) + ' m';
+    }
+    function niceFt(f){
+      if (!isFinite(f)) return '∞';
+      if (f >= 3000) return f.toFixed(0) + ' ft';
+      if (f >= 100) return f.toFixed(1) + ' ft';
+      if (f >= 10) return f.toFixed(2) + ' ft';
+      if (f >= 1) return f.toFixed(2) + ' ft';
+      return f.toFixed(3) + ' ft';
+    }
+    if (!isFinite(m)) return '∞';
+    return `${niceM(m)}  •  ${niceFt(feet)}`;
+  }
+
+  function parseDistance(){
+    let v = parseFloat(distIn.value || '0');
+    if (unit === 'ft') v = v / 3.280839895; // to meters
+    return Math.max(0.0001, v);
+  }
+
+  function getWH(){
+    if(sensorSel.value === 'custom'){
+      const w = parseFloat(custW.value||'0');
+      const h = parseFloat(custH.value||'0');
+      return {w, h};
+    }
+    const p = presets[sensorSel.value] || presets.ff_generic;
+    return {w:p.w, h:p.h};
+  }
+
+  function getCoC(){
+    // Priority: Advanced override -> Custom field -> derived from preset
+    const adv = parseFloat(cocIn.value);
+    if(adv){ return adv; }
+    if(sensorSel.value === 'custom'){
+      const w = parseFloat(custW.value||'0');
+      const h = parseFloat(custH.value||'0');
+      const cust = parseFloat(custCoC.value);
+      if(cust){ return cust; }
+      if(w>0 && h>0){ return defaultCoC(w,h); }
+      return 0.030; // fallback FF
+    } else {
+      const p = presets[sensorSel.value] || presets.ff_generic;
+      return defaultCoC(p.w, p.h);
+    }
+  }
+
+  function calc(){
+    const wh = getWH();
+    const f_mm = Math.max(0.1, parseFloat(focalIn.value || '0'));
+    const N = Math.max(0.1, parseFloat(apertureIn.value || '0'));
+    let s_m = parseDistance();
+    const s_mm = s_m * 1000.0;
+    const c_mm = getCoC();
+
+    // Hyperfocal
+    let H_mm = (f_mm*f_mm)/(N*c_mm);
+    if (document.getElementById('hfAdd').value === "1") H_mm += f_mm;
+
+    // Near / Far
+    const numerator = H_mm * s_mm;
+    const denomNear = H_mm + (s_mm - f_mm);
+    const denomFar = H_mm - (s_mm - f_mm);
+
+    const near_mm = numerator / denomNear;
+    let far_mm;
+    if (denomFar <= 0) { far_mm = Infinity; } else { far_mm = numerator / denomFar; }
+
+    const H_m = H_mm / 1000.0;
+    const near_m = near_mm / 1000.0;
+    const far_m = (far_mm === Infinity) ? Infinity : (far_mm / 1000.0);
+    const dof_m = (far_m === Infinity) ? Infinity : Math.max(0, far_m - near_m);
+
+    outH.textContent = fmt(H_m);
+    outNear.textContent = fmt(near_m);
+    outFar.textContent = (far_m === Infinity) ? '∞' : fmt(far_m);
+    outDoF.textContent = (dof_m === Infinity) ? '∞' : fmt(dof_m);
+
+    // Horizontal AOV
+    const aov_rad = 2 * Math.atan((wh.w) / (2 * f_mm));
+    const aov_deg = aov_rad * (180 / Math.PI);
+    outAOV.textContent = aov_deg.toFixed(2) + '°';
+
+    // Framing width at distance
+    const width_m = 2 * s_m * Math.tan(aov_rad/2);
+    outWidthAtDist.textContent = fmt(width_m);
+  }
+
+  document.getElementById('calc').addEventListener('click', calc);
+  ['sensor','focal','aperture','distance','coc','hfAdd','custW','custH','custCoC'].forEach(id => {
+    const node = document.getElementById(id);
+    if(!node) return;
+    node.addEventListener('change', calc);
+  });
+
+  // Default selection
+  document.getElementById('sensor').value = 'canon_ff';
+
+  // Keyboard: Enter triggers calc
+  document.addEventListener('keydown', (e)=>{ if(e.key==='Enter') calc(); });
+
+  // Initial state
+  calc();
+})();
+</script>
+</body>
+</html>
