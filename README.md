@@ -1,13 +1,13 @@
 # DOF Calculator  
 *Final project for the Building AI course*  
 
-## 1. Idea in a nutshell  
-**DOF Calculator** is a browser-based tool for photographers and filmmakers who want to quickly evaluate depth of field (DOF) while shooting or planning — without relying on any external services.  
-The tool runs entirely in your browser, works offline, and never sends or stores any data online.
+## Summary  
+A fast, privacy-first Depth of Field (DOF) calculator for photographers and filmmakers.  
+Runs entirely in your browser, works offline, and helps visualize how aperture, focal length, focus distance, and sensor size affect depth of field and framing — no data ever leaves your device.
 
 ---
 
-## 2. Background  
+## Background  
 Depth of field control is one of the key elements in visual storytelling, yet most existing calculators require an internet connection or display ads.  
 When shooting in remote locations or studios without connectivity, this can be a real issue.
 
@@ -22,7 +22,7 @@ This project helps creators plan and shoot independently, with privacy and relia
 
 ---
 
-## 3. Data and AI techniques  
+## Data and AI techniques  
 The current version is purely physics-based and does not rely on external datasets.  
 All calculations are performed locally in JavaScript using standard optical formulas involving:  
 - Aperture (f-stop)  
@@ -37,7 +37,7 @@ All calculations are performed locally in JavaScript using standard optical form
 
 ---
 
-## 4. How it’s used  
+## How it’s used  
 **Intended users:**
 - Photographers and filmmakers  
 - Students and teachers of optical theory  
@@ -52,7 +52,7 @@ All calculations are performed locally in JavaScript using standard optical form
 
 ---
 
-## 5. Challenges  
+## Challenges  
 **Limitations:**
 - Does not simulate lens character, bokeh, or sensor noise  
 - Cannot replace creative judgment or real test shots  
@@ -64,7 +64,7 @@ The project is fully privacy-safe and open for educational use.
 
 ---
 
-## 6. Next steps  
+## What next  
 **Potential future development:**
 - AI-assisted DOF simulation with visual focus previews  
 - Automatic EXIF analysis and recommendations  
@@ -74,6 +74,6 @@ Further development would benefit from collaboration with optical engineers, pho
 
 ---
 
-**Created by:**  
-Veijo “Wexi” Ruotanen
+## Acknowledgments  
+Created by **Veijo “Wexi” Ruotanen / Moodfilms**  
 [ruotanen.com](https://ruotanen.com)
